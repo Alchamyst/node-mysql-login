@@ -1,7 +1,7 @@
-const path = require('path');
-const express = require('express');
 const dotenv = require('dotenv');
+const express = require('express');
 const mysql = require("mysql2");
+const path = require('path');
 
 dotenv.config({ path: './.env' });
 
