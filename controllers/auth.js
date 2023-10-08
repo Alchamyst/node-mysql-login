@@ -1,6 +1,7 @@
+const bcrypt = require('bcryptjs');
 const database = require('../mysql/database');
 const jsonwebtoken = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const { promisify } = require('util');
 
 exports.login = async (req, res) => {
     try {
@@ -31,7 +32,7 @@ exports.login = async (req, res) => {
                 httpOnly: true
             };
 
-            res.cookie('user-session', token, cookieOptions);
+            res.cookie('userAuth', token, cookieOptions);
             res.status(200).redirect("/");
         });
 
@@ -68,4 +69,25 @@ exports.register = (req, res) => {
             });
         })
     });
+};
+
+exports.isLoggedIn = async (req, res, next) => {
+    if ( !req.cookies.userAuth ) return next();
+
+    try {
+        // 1) Verify token
+        const decoded = await promisify(jsonwebtoken.verify)(req.cookies.userSession, process.env.JWT_SECRET);
+
+        // 2) Check if user still exists
+        database.query('SELECT * FROM users WHERE id = ?', [decoded.id], (error, result) => {
+            if(!result) return next();
+
+            req.user = result[0];
+            return next();
+        });
+
+    } catch (error) {
+        console.log(error);
+        return next();
+    }     
 };
