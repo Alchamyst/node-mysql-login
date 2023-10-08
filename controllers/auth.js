@@ -76,7 +76,7 @@ exports.isLoggedIn = async (req, res, next) => {
 
     try {
         // 1) Verify token
-        const decoded = await promisify(jsonwebtoken.verify)(req.cookies.userSession, process.env.JWT_SECRET);
+        const decoded = await promisify(jsonwebtoken.verify)(req.cookies.userAuth, process.env.JWT_SECRET);
 
         // 2) Check if user still exists
         database.query('SELECT * FROM users WHERE id = ?', [decoded.id], (error, result) => {
