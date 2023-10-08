@@ -41,6 +41,15 @@ exports.login = async (req, res) => {
     } 
 }
 
+exports.logout = async (req, res) => {
+    res.cookie('userAuth', 'logout', {
+        expires: new Date(Date.now() + 2*1000),
+        httpOnly: true
+    });
+
+    res.status(200).redirect('/');
+}
+
 exports.register = (req, res) => {
     const { name, email, password, passwordconfirm } = req.body;
 
@@ -69,10 +78,11 @@ exports.register = (req, res) => {
             });
         })
     });
-};
+}
 
 exports.isLoggedIn = async (req, res, next) => {
     if ( !req.cookies.userAuth ) return next();
+    if ( req.cookies.userAuth == 'logout' ) return next();
 
     try {
         // 1) Verify token
@@ -90,4 +100,4 @@ exports.isLoggedIn = async (req, res, next) => {
         console.log(error);
         return next();
     }     
-};
+}
